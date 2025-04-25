@@ -59,37 +59,43 @@ jobs:
         with:
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
+      # Deploying the agent-service (Blue)
       - name: Deploy agent-service (Blue-Green)
         run: |
           kubectl apply -f ./k8s/agent-service/agent-deployment-blue.yaml
           kubectl apply -f ./k8s/agent-service/service.yaml
-          
+
+      # Deploying the aggregator-service (Blue)
       - name: Deploy aggregator-service (Blue-Green)
         run: |
           kubectl apply -f ./k8s/aggregator-service/aggregator-deployment-blue.yaml
           kubectl apply -f ./k8s/aggregator-service/service.yaml
 
+      # Deploying the integration-service (Blue)
       - name: Deploy integration-service (Blue-Green)
         run: |
           kubectl apply -f ./k8s/integration-service/integration-deployment-blue.yaml
           kubectl apply -f ./k8s/integration-service/service.yaml
 
+      # Deploying the notification-service (Blue)
       - name: Deploy notification-service (Blue-Green)
         run: |
           kubectl apply -f ./k8s/notification-service/notification-deployment-blue.yaml
           kubectl apply -f ./k8s/notification-service/service.yaml
 
+      # Switch Traffic to Blue (Production)
       - name: Switch Traffic to Blue (Production)
         run: |
           kubectl rollout status deployment/agent-service-blue
-          kubectl set image deployment/agent-service agent-service=anjalie19/agent-service:${GITHUB_SHA} --record
+          kubectl set image deployment/agent-service-blue agent-service=anjalie19/agent-service:${GITHUB_SHA} --record
           kubectl rollout status deployment/aggregator-service-blue
-          kubectl set image deployment/aggregator-service aggregator-service=anjalie19/aggregator-service:${GITHUB_SHA} --record
+          kubectl set image deployment/aggregator-service-blue aggregator-service=anjalie19/aggregator-service:${GITHUB_SHA} --record
           kubectl rollout status deployment/integration-service-blue
-          kubectl set image deployment/integration-service integration-service=anjalie19/integration-service:${GITHUB_SHA} --record
+          kubectl set image deployment/integration-service-blue integration-service=anjalie19/integration-service:${GITHUB_SHA} --record
           kubectl rollout status deployment/notification-service-blue
-          kubectl set image deployment/notification-service notification-service=anjalie19/notification-service:${GITHUB_SHA} --record
+          kubectl set image deployment/notification-service-blue notification-service=anjalie19/notification-service:${GITHUB_SHA} --record
 
+      # Verify Deployment
       - name: Verify Deployment
         run: |
           kubectl get all
@@ -97,7 +103,7 @@ jobs:
           kubectl describe deployment aggregator-service-blue
           kubectl describe deployment integration-service-blue
           kubectl describe deployment notification-service-blue
-          
+
   # Job to run post-deployment tests
   post_deployment_tests:
     runs-on: ubuntu-latest
@@ -109,4 +115,3 @@ jobs:
           curl -f http://aggregator-service-blue/health || exit 1
           curl -f http://integration-service-blue/health || exit 1
           curl -f http://notification-service-blue/health || exit 1
-
