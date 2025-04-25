@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+      version: blue
+  template:
+    metadata:
+      labels:
+        app: notification-service
+        version: blue
+    spec:
+      containers:
+        - name: notification-service
+          image: anjalie19/notification-service:latest
+          ports:
+            - containerPort: 5003

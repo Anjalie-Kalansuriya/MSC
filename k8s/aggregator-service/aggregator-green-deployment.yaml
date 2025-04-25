@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aggregator-service-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aggregator-service
+      version: green
+  template:
+    metadata:
+      labels:
+        app: aggregator-service
+        version: green
+    spec:
+      containers:
+        - name: aggregator-service
+          image: anjalie19/aggregator-service:latest
+          ports:
+            - containerPort: 5001

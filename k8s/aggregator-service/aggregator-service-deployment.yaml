@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aggregator-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aggregator-service
+  template:
+    metadata:
+      labels:
+        app: aggregator-service
+    spec:
+      containers:
+      - name: aggregator-service
+        image: anjalie19/aggregator-service:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_USER  # Updated to match secret key
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_PASSWORD  # Updated to match secret key
+        - name: MYSQL_HOST
+          value: mysql-service
+        - name: MYSQL_PORT
+          value: "3306"
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_DATABASE  # Updated to match secret key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aggregator-service
+spec:
+  selector:
+    app: aggregator-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+

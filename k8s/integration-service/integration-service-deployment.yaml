@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: integration-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: integration-service
+  template:
+    metadata:
+      labels:
+        app: integration-service
+    spec:
+      containers:
+      - name: integration-service
+        image: anjalie19/integration-service:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_USER  # updated key
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_PASSWORD  # updated key
+        - name: DB_HOST
+          value: mysql-service
+        - name: DB_NAME
+          value: moon_agent_db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: integration-service
+spec:
+  selector:
+    app: integration-service
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: ClusterIP
+
